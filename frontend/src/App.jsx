@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 
-const backendURL = 'http://127.0.0.1:8000';
+// ✅ Use live backend URL from Render
+const backendURL = 'https://financedashboard-27ex.onrender.com';
 
 function App() {
   const [income, setIncome] = useState('');
@@ -14,31 +15,43 @@ function App() {
   });
 
   const fetchSummary = async () => {
-    const response = await fetch(`${backendURL}/summary`);
-    const data = await response.json();
-    setSummary(data);
+    try {
+      const response = await fetch(`${backendURL}/summary`);
+      const data = await response.json();
+      setSummary(data);
+    } catch (error) {
+      console.error('Error fetching summary:', error);
+    }
   };
 
   const handleAddIncome = async () => {
-    if (!income || income <= 0) return; 
-    await fetch(`${backendURL}/add-income`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: parseFloat(income) }),
-    });
-    setIncome('');
-    fetchSummary();
+    if (!income || income <= 0) return;
+    try {
+      await fetch(`${backendURL}/add-income`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: parseFloat(income) }),
+      });
+      setIncome('');
+      fetchSummary();
+    } catch (error) {
+      console.error('Error adding income:', error);
+    }
   };
 
   const handleAddExpense = async () => {
-    if (!expense) return;
-    await fetch(`${backendURL}/add-expense`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: parseFloat(expense) }),
-    });
-    setExpense('');
-    fetchSummary();
+    if (!expense || expense <= 0) return;
+    try {
+      await fetch(`${backendURL}/add-expense`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: parseFloat(expense) }),
+      });
+      setExpense('');
+      fetchSummary();
+    } catch (error) {
+      console.error('Error adding expense:', error);
+    }
   };
 
   useEffect(() => {
@@ -73,7 +86,6 @@ function App() {
       <p>Total Income: ₹{summary.total_income}</p>
       <p>Total Expense: ₹{summary.total_expense}</p>
 
-      {/* ✅ Add History Below */}
       <h2>📊 History</h2>
       <ul>
         {summary.income?.map((item, index) => (
